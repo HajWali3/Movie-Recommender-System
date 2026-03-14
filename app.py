@@ -1,6 +1,7 @@
 import pickle
 import streamlit as st
 import requests
+import os
 
 def fetch_poster(movie_id):
     url = "https://api.themoviedb.org/3/movie/{}?api_key=8265bd1679663a7ea12ac168da84d2e8&language=en-US".format(movie_id)
@@ -26,7 +27,20 @@ def recommend(movie):
 
 st.header('Movie Recommender System')
 movies = pickle.load(open('movies.pkl','rb'))
-similarity = pickle.load(open('similarity.pkl','rb'))
+
+# -------------------------------
+# Download similarity.pkl at runtime if not present
+# -------------------------------
+similarity_file = "similarity.pkl"
+if not os.path.exists(similarity_file):
+    url = "https://drive.google.com/file/d/1BAUn42HxPL6mKEBj2OaDL2IfpNZW0zK5/view?usp=drive_link"
+    st.info("Downloading similarity matrix, please wait...")
+    response = requests.get(url)
+    with open(similarity_file, "wb") as f:
+        f.write(response.content)
+    st.success("Download complete!")
+
+similarity = pickle.load(open(similarity_file, "rb"))
 
 movie_list = movies['title'].values
 selected_movie = st.selectbox(
