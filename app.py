@@ -33,7 +33,7 @@ movies = pickle.load(open('movies.pkl','rb'))
 # -------------------------------
 similarity_file = "similarity.pkl"
 if not os.path.exists(similarity_file):
-    url = "https://drive.google.com/file/d/1BAUn42HxPL6mKEBj2OaDL2IfpNZW0zK5/view?usp=drive_link"
+    url = "https://drive.google.com/uc?export=download&id=1BAUn42HxPL6mKEBj2OaDL2IfpNZW0zK5"
     st.info("Downloading similarity matrix, please wait...")
     response = requests.get(url)
     with open(similarity_file, "wb") as f:
