@@ -28,19 +28,47 @@ def recommend(movie):
 st.header('Movie Recommender System')
 movies = pickle.load(open('movies.pkl','rb'))
 
-# -------------------------------
-# Download similarity.pkl at runtime if not present
-# -------------------------------
+import os
+import pickle
+import streamlit as st
+import requests
+
+def download_file_from_google_drive(id, destination):
+    """
+    Handles large Google Drive files
+    """
+    URL = "https://docs.google.com/uc?export=download"
+
+    session = requests.Session()
+    response = session.get(URL, params={'id': id}, stream=True)
+    token = None
+
+    # Check for large file warning
+    for key, value in response.cookies.items():
+        if key.startswith('download_warning'):
+            token = value
+
+    if token:
+        params = {'id': id, 'confirm': token}
+        response = session.get(URL, params=params, stream=True)
+
+    # Save the file
+    with open(destination, "wb") as f:
+        for chunk in response.iter_content(32768):
+            if chunk:
+                f.write(chunk)
+
+# ------------------------
 similarity_file = "similarity.pkl"
+file_id = "1BAUn42HxPL6mKEBj2OaDL2IfpNZW0zK5"  # Your Google Drive file ID
+
 if not os.path.exists(similarity_file):
-    url = "https://drive.google.com/uc?export=download&id=1BAUn42HxPL6mKEBj2OaDL2IfpNZW0zK5"
     st.info("Downloading similarity matrix, please wait...")
-    response = requests.get(url)
-    with open(similarity_file, "wb") as f:
-        f.write(response.content)
+    download_file_from_google_drive(file_id, similarity_file)
     st.success("Download complete!")
 
-similarity = pickle.load(open(similarity_file, "rb"))
+with open(similarity_file, "rb") as f:
+    similarity = pickle.load(f)
 
 movie_list = movies['title'].values
 selected_movie = st.selectbox(
